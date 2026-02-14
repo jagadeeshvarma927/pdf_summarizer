@@ -1,18 +1,132 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PDF News Analyzer</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <div class="container">
-        <h2>Upload News PDFs</h2>
+    <title>PDF Summarizer for Stock News</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="files" multiple accept=".pdf">
-            <br><br>
-            <button type="submit">Upload PDFs</button>
-        </form>
+    <style>
+        body {
+            background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .overlay {
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .glass {
+            backdrop-filter: blur(18px);
+            background: rgba(255, 255, 255, 0.85);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center">
+
+<div class="overlay absolute inset-0"></div>
+
+<div class="relative glass shadow-2xl rounded-3xl p-10 w-full max-w-2xl text-center">
+
+    <!-- Title -->
+    <h1 class="text-4xl font-bold text-green-800 mb-2">
+        📈 PDF Summarizer for Stock News
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="text-gray-700 text-lg mb-8">
+        Hello Dear 👋 Welcome to PDF Summarizer.<br>
+        Please upload the PDF files that you want to analyze.
+    </p>
+
+    <!-- Upload Form -->
+    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+
+        <!-- Drag Drop Zone -->
+        <div id="dropZone"
+             class="border-2 border-dashed border-green-500 rounded-2xl p-8 cursor-pointer hover:border-green-700 transition bg-white/70">
+
+            <p class="text-gray-700 text-lg">
+                Drag & Drop your PDFs here
+            </p>
+            <p class="text-sm text-gray-500 mt-1">
+                or click to browse files
+            </p>
+
+            <input type="file" id="fileInput" name="files" multiple accept=".pdf" class="hidden">
+        </div>
+
+        <!-- Selected Files -->
+        <div id="fileList" class="mt-6 text-left text-sm text-gray-700"></div>
+
+        <!-- Button -->
+        <button type="submit"
+                class="w-full mt-8 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-2xl font-semibold text-lg hover:scale-105 transform transition duration-200 shadow-lg">
+            Analyze & Download Excel
+        </button>
+
+        <!-- Loader -->
+        <div id="loader" class="hidden mt-6">
+            <div class="flex items-center justify-center space-x-2">
+                <div class="w-4 h-4 bg-green-500 rounded-full animate-bounce"></div>
+                <div class="w-4 h-4 bg-emerald-500 rounded-full animate-bounce delay-150"></div>
+                <div class="w-4 h-4 bg-lime-500 rounded-full animate-bounce delay-300"></div>
+            </div>
+            <p class="text-green-200 mt-3">Analyzing PDFs... Please wait</p>
+        </div>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="mt-10 text-xs text-gray-600">
+        Powered by AI • Groq • LangChain
     </div>
+
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const form = document.getElementById('uploadForm');
+    const loader = document.getElementById('loader');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-green-700');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-green-700');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileInput.files = e.dataTransfer.files;
+        displayFiles();
+    });
+
+    fileInput.addEventListener('change', displayFiles);
+
+    function displayFiles() {
+        fileList.innerHTML = "";
+        Array.from(fileInput.files).forEach(file => {
+            fileList.innerHTML += `
+                <div class="flex items-center space-x-2 mb-2">
+                    <span>📄</span>
+                    <span>${file.name}</span>
+                </div>
+            `;
+        });
+    }
+
+    form.addEventListener('submit', () => {
+        loader.classList.remove('hidden');
+    });
+</script>
+
 </body>
 </html>

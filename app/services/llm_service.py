@@ -62,7 +62,7 @@ Article:
         chain = prompt | llm
 
         response = chain.invoke({
-            "article": text[:6000]
+            "article": text[:3000]
         })
 
         content = response.content.strip()
