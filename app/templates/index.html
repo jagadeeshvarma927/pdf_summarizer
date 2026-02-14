@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF News Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Upload News PDFs</h2>
+
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="files" multiple accept=".pdf">
+            <br><br>
+            <button type="submit">Upload PDFs</button>
+        </form>
+    </div>
+</body>
+</html>
