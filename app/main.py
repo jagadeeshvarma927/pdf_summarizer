@@ -86,8 +86,9 @@ from app.services.llm_service import extract_company_info
 from app.services.excel_service import generate_excel
 from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
+from fastapi.responses import Response
 
-
+generated_excel_data = None
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -143,12 +144,13 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
         if (i + 1) % MAX_PER_MINUTE == 0:
             print("Sleeping 60 seconds to respect rate limits...")
             time.sleep(SLEEP_TIME)
+    
+    global generated_excel_data
 
     # Save Excel locally
     excel_file = generate_excel(results)
 
-    with open(EXCEL_FILE_PATH, "wb") as f:
-        f.write(excel_file.getbuffer())
+    generated_excel_data = excel_file.getvalue()
 
     return JSONResponse({"status": "completed"})
 
@@ -157,12 +159,19 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
 
 @app.get("/download")
 async def download_excel():
-    return FileResponse(
-        EXCEL_FILE_PATH,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        filename="company_news_summary.xlsx"
-    )
 
+    global generated_excel_data
+
+    if not generated_excel_data:
+        return JSONResponse({"error": "No file generated yet"}, status_code=400)
+
+    return Response(
+        content=generated_excel_data,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": "attachment; filename=company_news_summary.xlsx"
+        }
+    )
 
 
 # @app.post("/upload")
