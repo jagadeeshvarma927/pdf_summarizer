@@ -10,9 +10,12 @@ from app.config import GROQ_API_KEY
 
 
 # Initialize LLM
+# meta-llama/llama-4-scout-17b-16e-instruct
+# llama-3.3-70b-versatile
+#
 llm = ChatGroq(
     groq_api_key=GROQ_API_KEY,
-    model_name="llama-3.3-70b-versatile",
+    model_name="meta-llama/llama-4-scout-17b-16e-instruct",
     temperature=0
 )
 
