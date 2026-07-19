@@ -46,6 +46,7 @@ instance/
 .coverage
 htmlcov/
 database.db
+logs/
 
 
 venv/

@@ -11,9 +11,11 @@ from app.services.excel_service import generate_excel
 from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
 from fastapi.responses import Response
+from app.logger import get_logger
 
 generated_excel_data = None
 app = FastAPI()
+logger = get_logger("pdf_summarizer.main")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
@@ -38,19 +40,24 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
     SLEEP_TIME = 60
 
     total_files = len(files)
+    logger.info("Upload request received for %s file(s)", total_files)
 
     for i, file in enumerate(files):
 
         if not file.filename.lower().endswith(".pdf"):
+            logger.info("Skipping non-PDF file: %s", file.filename)
             continue
 
         try:
+            logger.info("Processing PDF: %s", file.filename)
             text = extract_text_from_pdf(file)
 
             if not text.strip():
+                logger.warning("Empty PDF content for %s", file.filename)
                 raise ValueError("Empty PDF content")
             
             llm_output = extract_company_info(text)
+            logger.info("LLM processing completed for %s", file.filename)
 
             results.append({
                 "Filename": file.filename,
@@ -59,6 +66,7 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
             })
 
         except Exception as e:
+            logger.exception("Failed to process %s", file.filename)
             results.append({
                 "Filename": file.filename,
                 "Company Name": "Error",
@@ -66,15 +74,15 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
             })
 
         if (i + 1) % MAX_PER_MINUTE == 0:
-            print("Sleeping 60 seconds to respect rate limits...")
+            logger.info("Sleeping 60 seconds to respect rate limits")
             time.sleep(SLEEP_TIME)
     
     global generated_excel_data
 
     # Save Excel locally
     excel_file = generate_excel(results)
-
     generated_excel_data = excel_file.getvalue()
+    logger.info("Excel file generated with %s result(s)", len(results))
 
     return JSONResponse({"status": "completed"})
 
