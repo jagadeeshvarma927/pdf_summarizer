@@ -20,7 +20,7 @@ pip install -r requirements.txt
 Start the FastAPI server with Uvicorn from the repository root:
 
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 Then open your browser at http://localhost:8000 and use the upload form.
