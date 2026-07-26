@@ -17,7 +17,7 @@ logger = get_logger("pdf_summarizer.llm")
 #
 llm = ChatGroq(
     groq_api_key=GROQ_API_KEY,
-    model_name="qwen/qwen3.6-27b",
+    model_name="groq/compound",
     temperature=0
 )
 
