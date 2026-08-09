@@ -84,43 +84,25 @@ def extract_company_info(text: str):
     """
 
     prompt = ChatPromptTemplate.from_template("""
-You are a financial news analyzer.
+Analyze this financial news article for short-term NSE trading.
 
-Analyze the article and extract:
-
-1. Company Name:
-   Identify the main NSE-listed company discussed.
-
-2. Summary:
-   Write a concise 5-6 line summary focusing on information useful
-   for a stock broker looking for short-term trading opportunities.
-
-3. Sentiment:
-   Classify the overall news sentiment as exactly one of:
-   - positive
-   - negative
-   - neutral
-
-IMPORTANT:
-Return ONLY a valid JSON object.
-Do not return markdown.
-Do not return ```json.
-Do not add explanations before or after the JSON.
-Return a single JSON object only - never a list/array, and never more
-than one object.
-
-The JSON must have exactly these fields:
-
+Return ONLY valid JSON with exactly these fields:
 {{
-    "company_name": "Company Name",
-    "summary": "5-6 line summary",
-    "sentiment": "positive"
+  "company_name": "main NSE-listed company",
+  "summary": "concise 4-5 line trading-focused summary",
+  "sentiment": "positive|negative|neutral"
 }}
+
+Rules:
+- Identify the main NSE-listed company.
+- Focus the summary on events that could affect the stock in the short term.
+- Sentiment must be exactly: positive, negative, or neutral.
+- No markdown, explanation, or extra text.
+- Return one JSON object only.
 
 Article:
 {article}
 """)
-
     try:
 
         chain = prompt | llm
