@@ -20,7 +20,7 @@ logger = get_logger("pdf_summarizer.llm")
 
 llm = ChatGroq(
     groq_api_key=GROQ_API_KEY,
-    model_name="llama-3.3-70b-versatile",
+    model_name="llama-3.1-8b-instant",
     temperature=0,
     model_kwargs={
         "response_format": {"type": "json_object"}
