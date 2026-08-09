@@ -58,7 +58,7 @@ def _is_rate_limit_error(error: Exception) -> bool:
 
 def extract_company_info(text: str):
     """
-    Extract company name and summary using LangChain + Groq
+    Extract company name, summary, and sentiment using LangChain + Groq
     """
 
     prompt = ChatPromptTemplate.from_template("""
@@ -68,12 +68,14 @@ From the article below, extract:
 
 1. Company Name (Main company discussed)
 2. A concise 5-6 line summary
+3. Sentiment (positive, negative, or neutral based on the news tone)
 
 Return ONLY valid JSON in this format:
 
 {{
   "company_name": "...",
-  "summary": "..."
+  "summary": "...",
+  "sentiment": "positive|negative|neutral"
 }}
 
 Article:
@@ -106,14 +108,15 @@ Article:
             logger.exception("LLM processing failed: %s", str(e))
         return {
             "company_name": "Not Found",
-            "summary": "Error generating summary"
+            "summary": "Error generating summary",
+            "sentiment": "unknown"
         }
 
 
 # if __name__ == "__main__":
 #     # Test with a sample article
 #     sample_text = """
-#     Apple Inc. reported its quarterly earnings on Tuesday, surpassing Wall Street expectations. The tech giant posted a revenue of $90 billion, driven by strong sales of the iPhone 15 and increased services revenue. CEO Tim Cook highlighted the company's focus on innovation and sustainability during the earnings call. Despite supply chain challenges, Apple continues to demonstrate resilience in the competitive technology market.
+#     Apple Inc. reported its quarterly earnings on Tuesday, surpassing Wall Street expectations. The tech giant posted a revenue of $90 billion, driven by strong sales of the iPhone 15 and increased [...]
 #     """
 
 #     result = extract_company_info(sample_text)
