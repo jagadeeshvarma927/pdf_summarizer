@@ -60,11 +60,11 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
             logger.info("LLM processing completed for %s", file.filename)
 
             results.append({
-                            "Filename": file.filename,
-                            "Company Name": llm_output.get("company_name", "Not Found"),
-                            "Summary": llm_output.get("summary", "No summary available"),
-                            "Sentiment": llm_output.get("sentiment", "unknown")
-                            })
+    "Filename": file.filename,
+    "Company Name": llm_output.get("company_name", "Not Found"),
+    "Summary": llm_output.get("summary", "No summary available"),
+    "Sentiment": llm_output.get("sentiment", "unknown")
+})
 
         except Exception as e:
             logger.exception("Failed to process %s", file.filename)
