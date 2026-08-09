@@ -30,11 +30,15 @@ llm = ChatGroq(
 
 def clean_json_response(text: str):
     """
-    Cleans the LLM response and extracts JSON.
+    Cleans the LLM response by stripping markdown code fences.
+
+    NOTE: This intentionally does NOT try to regex-extract a JSON object
+    from the text. A greedy `\\{.*\\}` match will grab from the FIRST
+    '{' to the LAST '}' in the whole string, which corrupts valid JSON
+    when the model returns a list of objects (e.g. "[{}, {...}]"). JSON
+    shape handling (object vs list) is done after parsing instead, in
+    extract_company_info().
     """
-
-
-
 
     if not text:
         raise ValueError("LLM returned an empty response")
@@ -50,12 +54,6 @@ def clean_json_response(text: str):
 
     if not text:
         raise ValueError("LLM returned an empty response after cleaning")
-
-    # Try to extract JSON object
-    json_match = re.search(r"\{.*\}", text, re.DOTALL)
-
-    if json_match:
-        return json_match.group(0).strip()
 
     return text
 
@@ -108,6 +106,8 @@ Return ONLY a valid JSON object.
 Do not return markdown.
 Do not return ```json.
 Do not add explanations before or after the JSON.
+Return a single JSON object only - never a list/array, and never more
+than one object.
 
 The JSON must have exactly these fields:
 
@@ -168,8 +168,38 @@ Article:
             cleaned
         )
 
-        result = json.loads(cleaned)
+        parsed = json.loads(cleaned)
 
+        # Groq's json_object mode is supposed to guarantee a single JSON
+        # object, but in practice the model occasionally wraps the result
+        # in a list - sometimes with a stray empty {} as the first
+        # element. Normalize any of these shapes down to a single dict.
+        if isinstance(parsed, list):
+            candidates = [
+                item for item in parsed
+                if isinstance(item, dict) and item
+            ]
+
+            if not candidates:
+                raise ValueError(
+                    "LLM returned no usable JSON object in list response"
+                )
+
+            if len(candidates) > 1:
+                logger.warning(
+                    "LLM returned %s candidate objects, using the first",
+                    len(candidates)
+                )
+
+            result = candidates[0]
+
+        elif isinstance(parsed, dict):
+            result = parsed
+
+        else:
+            raise ValueError(
+                f"Unexpected JSON shape from LLM: {type(parsed).__name__}"
+            )
 
         # Validate required fields
         company_name = result.get("company_name")
