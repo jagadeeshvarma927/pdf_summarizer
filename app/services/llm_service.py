@@ -20,7 +20,7 @@ logger = get_logger("pdf_summarizer.llm")
 
 llm = ChatGroq(
     groq_api_key=GROQ_API_KEY,
-    model_name="llama-3.1-8b-instant",
+    model_name="openai/gpt-oss-20b",
     temperature=0,
     model_kwargs={
         "response_format": {"type": "json_object"}
